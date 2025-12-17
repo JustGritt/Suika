@@ -15,17 +15,29 @@ class PowerUpManager {
             'FREEZE': 0     // Start locked
         };
 
-        // Define progression milestones
+        // Define progression milestones - spread out to score 1000
         this.progressionMilestones = [
             { score: 0, reward: 'BOMB', amount: 1, description: 'Start with 1 Bomb' },
-            { score: 20, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' },
-            { score: 40, reward: 'RAINBOW', amount: 1, description: 'Unlock Rainbow!' },
-            { score: 60, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' },
-            { score: 80, reward: 'RAINBOW', amount: 1, description: '+1 Rainbow charge' },
-            { score: 100, reward: 'SHRINK', amount: 1, description: 'Unlock Shrink Ray!' },
-            { score: 130, reward: 'SHRINK', amount: 1, description: '+1 Shrink charge' },
-            { score: 160, reward: 'FREEZE', amount: 1, description: 'Unlock Time Freeze!' },
-            { score: 200, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' }
+            { score: 50, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' },
+            { score: 100, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' },
+            { score: 150, reward: 'RAINBOW', amount: 1, description: 'Unlock Rainbow!' },
+            { score: 200, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' },
+            { score: 250, reward: 'RAINBOW', amount: 1, description: '+1 Rainbow charge' },
+            { score: 300, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' },
+            { score: 350, reward: 'RAINBOW', amount: 1, description: '+1 Rainbow charge' },
+            { score: 400, reward: 'SHRINK', amount: 1, description: 'Unlock Shrink Ray!' },
+            { score: 450, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' },
+            { score: 500, reward: 'SHRINK', amount: 1, description: '+1 Shrink charge' },
+            { score: 550, reward: 'RAINBOW', amount: 1, description: '+1 Rainbow charge' },
+            { score: 600, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' },
+            { score: 650, reward: 'SHRINK', amount: 1, description: '+1 Shrink charge' },
+            { score: 700, reward: 'FREEZE', amount: 1, description: 'Unlock Time Freeze!' },
+            { score: 750, reward: 'RAINBOW', amount: 1, description: '+1 Rainbow charge' },
+            { score: 800, reward: 'FREEZE', amount: 1, description: '+1 Freeze charge' },
+            { score: 850, reward: 'BOMB', amount: 1, description: '+1 Bomb charge' },
+            { score: 900, reward: 'SHRINK', amount: 1, description: '+1 Shrink charge' },
+            { score: 950, reward: 'FREEZE', amount: 1, description: '+1 Freeze charge' },
+            { score: 1000, reward: 'RAINBOW', amount: 1, description: '+1 Rainbow charge' }
         ];
 
         // Track which milestones have been claimed
@@ -182,7 +194,7 @@ class PowerUpManager {
     }
 
     createDesktopPowerUpUI() {
-        const startX = 620;
+        const startX = 625; // Positioned to fit within 800px canvas (625 + 160 = 785, leaving 15px margin)
         const startY = 100;
         const spacing = 80;
 
@@ -268,11 +280,11 @@ class PowerUpManager {
                 y - 17,
                 powerUp.name,
                 {
-                    fontSize: '13px',
+                    fontSize: '15px', // Increased from 13px
                     color: '#000000',
                     fontStyle: 'bold',
                     stroke: '#ffffff',
-                    strokeThickness: 2
+                    strokeThickness: 3 // Increased from 2
                 }
             );
 
@@ -282,21 +294,22 @@ class PowerUpManager {
                 y + 3,
                 powerUp.description,
                 {
-                    fontSize: '9px',
-                    color: '#333333',
+                    fontSize: '11px', // Increased from 9px for better readability
+                    color: '#222222', // Darker for better contrast
+                    fontStyle: 'bold', // Added bold
                     stroke: '#ffffff',
-                    strokeThickness: 1.5,
+                    strokeThickness: 2.5, // Increased from 1.5
                     wordWrap: { width: 100 }
                 }
             );
 
-            // Charge counter
+            // Charge counter (positioned above to avoid overlap with longer names)
             const chargeText = this.scene.add.text(
                 startX + 150,
-                y - 22,
+                y - 28,
                 `x${this.powerUpCharges[key]}`,
                 {
-                    fontSize: '16px',
+                    fontSize: '14px',
                     color: '#ff6600',
                     fontStyle: 'bold',
                     stroke: '#ffffff',
@@ -410,7 +423,7 @@ class PowerUpManager {
 
             // Update desktop button graphics
             if (btn.btnGraphics) {
-                const startX = 620;
+                const startX = 625; // Match createDesktopPowerUpUI
                 const startY = 100;
                 const spacing = 80;
                 const y = startY + index * spacing;
@@ -796,7 +809,7 @@ class PowerUpManager {
     }
 
     createDesktopProgressBar() {
-        const x = 620;
+        const x = 625; // Match power-up position
         const y = 430;
         const width = 160;
         const height = 80;

@@ -55,8 +55,8 @@ class GameScene extends Phaser.Scene {
                     }
                 } else {
                     // Desktop: power-ups are on the right side
-                    const powerUpAreaLeft = 620;
-                    const powerUpAreaRight = 620 + 140 + 20;
+                    const powerUpAreaLeft = 625;
+                    const powerUpAreaRight = 625 + 160 + 20;
                     if (pointer.x >= powerUpAreaLeft && pointer.x <= powerUpAreaRight) {
                         inPowerUpArea = true;
                     }
@@ -70,6 +70,59 @@ class GameScene extends Phaser.Scene {
 
         // Create preview fruit
         this.createPreviewFruit();
+
+        // Add vintage game aesthetic without affecting text readability
+        this.createVintageEffects();
+    }
+
+    createVintageEffects() {
+        // GameBoy/Calculator LCD screen effect - that iconic green tint!
+        const lcdOverlay = this.add.graphics();
+        lcdOverlay.setDepth(1000);
+
+        // Classic GameBoy LCD green-yellow tint
+        lcdOverlay.fillStyle(0x9bbc0f, 0.08); // GameBoy green
+        lcdOverlay.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        // CRT scanlines for authentic retro monitor look
+        const scanlineGraphics = this.add.graphics();
+        scanlineGraphics.setDepth(1002);
+
+        // Draw subtle horizontal scanlines (darker green for LCD aesthetic)
+        scanlineGraphics.lineStyle(1, 0x0f380f, 0.05);
+        for (let y = 0; y < GAME_HEIGHT; y += 3) {
+            scanlineGraphics.beginPath();
+            scanlineGraphics.moveTo(0, y);
+            scanlineGraphics.lineTo(GAME_WIDTH, y);
+            scanlineGraphics.strokePath();
+        }
+
+        // Subtle green vignette (much lighter than black)
+        const vignetteGraphics = this.add.graphics();
+        vignetteGraphics.setDepth(1001);
+
+        const steps = 15;
+        const maxWidth = 120;
+
+        for (let i = 0; i < steps; i++) {
+            const width = (maxWidth * (i + 1)) / steps;
+            const opacity = 0.08 * ((steps - i) / steps);
+
+            // Dark olive green for LCD vignette effect
+            vignetteGraphics.fillStyle(0x0f380f, opacity);
+
+            // Top fade
+            vignetteGraphics.fillRect(0, 0, GAME_WIDTH, width / 4);
+
+            // Bottom fade
+            vignetteGraphics.fillRect(0, GAME_HEIGHT - width / 4, GAME_WIDTH, width / 4);
+
+            // Left fade
+            vignetteGraphics.fillRect(0, 0, width / 4, GAME_HEIGHT);
+
+            // Right fade
+            vignetteGraphics.fillRect(GAME_WIDTH - width / 4, 0, width / 4, GAME_HEIGHT);
+        }
     }
 
     createContainer() {
@@ -82,12 +135,30 @@ class GameScene extends Phaser.Scene {
         const top = CONTAINER_Y - CONTAINER_HEIGHT / 2;
         const bottom = CONTAINER_Y + CONTAINER_HEIGHT / 2;
 
-        // Light to slightly darker gradient for depth
-        graphics.fillGradientStyle(0xf8f8f8, 0xf8f8f8, 0xe8e8e8, 0xe8e8e8, 1);
+        // Soft pastel gradient background (sky blue to white)
+        graphics.fillGradientStyle(0xe3f2fd, 0xe3f2fd, 0xffffff, 0xffffff, 1);
         graphics.fillRect(left, top, CONTAINER_WIDTH, CONTAINER_HEIGHT);
 
+        // Add subtle cloud pattern
+        graphics.fillStyle(0xffffff, 0.3);
+        for (let i = 0; i < 8; i++) {
+            const cloudX = left + (CONTAINER_WIDTH / 8) * i + Math.random() * 30;
+            const cloudY = top + Math.random() * (CONTAINER_HEIGHT * 0.4);
+            graphics.fillCircle(cloudX, cloudY, 20 + Math.random() * 10);
+            graphics.fillCircle(cloudX + 15, cloudY - 5, 15 + Math.random() * 8);
+            graphics.fillCircle(cloudX + 25, cloudY, 18 + Math.random() * 10);
+        }
+
+        // Add subtle dots pattern for texture
+        graphics.fillStyle(0xbbdefb, 0.15);
+        for (let y = top; y < bottom; y += 15) {
+            for (let x = left; x < right; x += 15) {
+                graphics.fillCircle(x + (y % 2 === 0 ? 0 : 7.5), y, 1.5);
+            }
+        }
+
         // Inner shadow effect for depth
-        graphics.lineStyle(2, 0x000000, 0.05);
+        graphics.lineStyle(3, 0x000000, 0.08);
         graphics.strokeRect(left + 2, top + 2, CONTAINER_WIDTH - 4, CONTAINER_HEIGHT - 4);
 
         // Danger line with glow effect
@@ -152,40 +223,70 @@ class GameScene extends Phaser.Scene {
             wallOptions
         );
 
-        // Border (open top) with depth
+        // Create decorative wicker basket borders
         const borderGraphics = this.add.graphics();
+        borderGraphics.setDepth(5);
 
-        // Shadow/depth effect
-        borderGraphics.lineStyle(CONTAINER_WALL_THICKNESS + 4, 0x000000, 0.15);
-        borderGraphics.strokeRect(left - 2, top - 2, CONTAINER_WIDTH + 4, CONTAINER_HEIGHT + 4);
+        // Wicker/rattan basket colors
+        const wickerLight = 0xd4a574;
+        const wickerMid = 0xb8936f;
+        const wickerDark = 0x9c7a5a;
 
-        // Main border with gradient effect
-        borderGraphics.lineStyle(CONTAINER_WALL_THICKNESS, 0x2a2a2a, 1);
+        // Left border - wicker weave pattern
+        for (let y = top; y < bottom; y += 6) {
+            const shade = (y % 12 === 0) ? wickerLight : wickerMid;
+            borderGraphics.fillStyle(shade, 1);
+            borderGraphics.fillRect(left - CONTAINER_WALL_THICKNESS, y, CONTAINER_WALL_THICKNESS, 6);
+        }
 
-        // Left border
-        borderGraphics.beginPath();
-        borderGraphics.moveTo(left, top);
-        borderGraphics.lineTo(left, bottom);
-        borderGraphics.strokePath();
+        // Add vertical weave lines
+        borderGraphics.lineStyle(1, wickerDark, 0.5);
+        for (let i = 0; i < 3; i++) {
+            const x = left - CONTAINER_WALL_THICKNESS + (i * CONTAINER_WALL_THICKNESS / 3);
+            borderGraphics.beginPath();
+            borderGraphics.moveTo(x, top);
+            borderGraphics.lineTo(x, bottom);
+            borderGraphics.strokePath();
+        }
 
-        // Right border
-        borderGraphics.beginPath();
-        borderGraphics.moveTo(right, top);
-        borderGraphics.lineTo(right, bottom);
-        borderGraphics.strokePath();
+        // Right border - wicker weave pattern
+        for (let y = top; y < bottom; y += 6) {
+            const shade = (y % 12 === 0) ? wickerLight : wickerMid;
+            borderGraphics.fillStyle(shade, 1);
+            borderGraphics.fillRect(right, y, CONTAINER_WALL_THICKNESS, 6);
+        }
 
-        // Bottom border (thicker for emphasis)
-        borderGraphics.lineStyle(CONTAINER_WALL_THICKNESS + 2, 0x1a1a1a, 1);
-        borderGraphics.beginPath();
-        borderGraphics.moveTo(left, bottom);
-        borderGraphics.lineTo(right, bottom);
-        borderGraphics.strokePath();
+        // Add vertical weave lines
+        borderGraphics.lineStyle(1, wickerDark, 0.5);
+        for (let i = 0; i < 3; i++) {
+            const x = right + (i * CONTAINER_WALL_THICKNESS / 3);
+            borderGraphics.beginPath();
+            borderGraphics.moveTo(x, top);
+            borderGraphics.lineTo(x, bottom);
+            borderGraphics.strokePath();
+        }
 
-        // Inner highlight for 3D effect
-        borderGraphics.lineStyle(2, 0x555555, 0.6);
-        borderGraphics.strokeRect(left + CONTAINER_WALL_THICKNESS/2, top + CONTAINER_WALL_THICKNESS/2,
-                                   CONTAINER_WIDTH - CONTAINER_WALL_THICKNESS,
-                                   CONTAINER_HEIGHT - CONTAINER_WALL_THICKNESS);
+        // Bottom border - thicker wicker base
+        for (let x = left - CONTAINER_WALL_THICKNESS; x < right + CONTAINER_WALL_THICKNESS; x += 8) {
+            const shade = (x % 16 === 0) ? wickerMid : wickerDark;
+            borderGraphics.fillStyle(shade, 1);
+            borderGraphics.fillRect(x, bottom, 8, CONTAINER_WALL_THICKNESS + 4);
+        }
+
+        // Add horizontal weave lines to bottom
+        borderGraphics.lineStyle(1, wickerLight, 0.6);
+        for (let i = 0; i < 2; i++) {
+            const y = bottom + (i * (CONTAINER_WALL_THICKNESS + 4) / 2);
+            borderGraphics.beginPath();
+            borderGraphics.moveTo(left - CONTAINER_WALL_THICKNESS, y);
+            borderGraphics.lineTo(right + CONTAINER_WALL_THICKNESS, y);
+            borderGraphics.strokePath();
+        }
+
+        // Add subtle shadow under basket
+        borderGraphics.fillStyle(0x000000, 0.15);
+        borderGraphics.fillEllipse(CONTAINER_X, bottom + CONTAINER_WALL_THICKNESS + 8,
+                                    CONTAINER_WIDTH / 2, 10);
     }
 
     createUI() {

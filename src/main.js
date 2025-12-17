@@ -20,6 +20,12 @@ const config = {
             constraintIterations: 2
         }
     },
+    pixelArt: true, // Enable pixel art mode for crisp pixels
+    render: {
+        pixelArt: true,
+        antialias: false,
+        roundPixels: true
+    },
     scene: [GameScene]
 };
 
