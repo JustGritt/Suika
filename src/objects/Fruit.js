@@ -51,6 +51,11 @@ class Fruit {
 
             // Add a subtle border
             this.bubble.setStrokeStyle(2, this.config.color, 0.4);
+
+            // Add special golden glow effect for golden cherry
+            if (this.config.isGolden) {
+                this.createGoldenEffect();
+            }
         }
 
         // Add emoji text on top of bubble
@@ -69,6 +74,60 @@ class Fruit {
         }
     }
 
+    createGoldenEffect() {
+        // Create a pulsing golden glow
+        this.goldenGlow = this.scene.add.circle(
+            this.body.position.x,
+            this.body.position.y,
+            this.config.radius * 1.5,
+            0xffd700, // Golden color
+            0.3
+        );
+        this.goldenGlow.setDepth(0.5); // Behind bubble but visible
+
+        // Pulsing animation
+        this.scene.tweens.add({
+            targets: this.goldenGlow,
+            alpha: 0.5,
+            scale: 1.2,
+            duration: 800,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
+        // Create sparkle particles
+        this.sparkleTimer = this.scene.time.addEvent({
+            delay: 300,
+            callback: () => {
+                if (!this.merged) {
+                    this.createSparkle();
+                }
+            },
+            loop: true
+        });
+    }
+
+    createSparkle() {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = this.config.radius * 0.7;
+        const sparkleX = this.body.position.x + Math.cos(angle) * distance;
+        const sparkleY = this.body.position.y + Math.sin(angle) * distance;
+
+        const sparkle = this.scene.add.circle(sparkleX, sparkleY, 2, 0xffff00, 1);
+        sparkle.setDepth(2);
+
+        this.scene.tweens.add({
+            targets: sparkle,
+            y: sparkleY - 15,
+            alpha: 0,
+            scale: 0,
+            duration: 600,
+            ease: 'Cubic.easeOut',
+            onComplete: () => sparkle.destroy()
+        });
+    }
+
     update() {
         // Update graphics position to match physics body
         this.updateGraphics();
@@ -85,6 +144,11 @@ class Fruit {
             // Rotate the emoji to match the physics body rotation
             this.text.setRotation(this.body.angle);
         }
+
+        // Update golden glow position
+        if (this.goldenGlow) {
+            this.goldenGlow.setPosition(this.body.position.x, this.body.position.y);
+        }
     }
 
     destroy() {
@@ -93,6 +157,12 @@ class Fruit {
         }
         if (this.text) {
             this.text.destroy();
+        }
+        if (this.goldenGlow) {
+            this.goldenGlow.destroy();
+        }
+        if (this.sparkleTimer) {
+            this.sparkleTimer.remove();
         }
         this.scene.matter.world.remove(this.body);
     }

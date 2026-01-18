@@ -20,6 +20,9 @@ class GameScene extends Phaser.Scene {
         this.canDrop = true;
         this.lastDroppedFruit = null;
 
+        // Track number of fruits dropped to hide instructions
+        this.fruitsDropped = 0;
+
         // Create container
         this.createContainer();
 
@@ -338,9 +341,9 @@ class GameScene extends Phaser.Scene {
         this.highScoreText.setOrigin(1, 0);
         this.highScoreText.setDepth(1000);
 
-        // Instructions - centered below title (only show on desktop)
+        // Instructions - centered (only show on desktop, hide after first few fruits)
         if (!IS_MOBILE) {
-            const instructions = this.add.text(
+            this.instructions = this.add.text(
                 GAME_WIDTH / 2,
                 65,
                 '🖱️ Click to drop fruit  •  🍒 Match fruits to merge',
@@ -351,8 +354,8 @@ class GameScene extends Phaser.Scene {
                     strokeThickness: 1.5
                 }
             );
-            instructions.setOrigin(0.5, 0);
-            instructions.setDepth(1000);
+            this.instructions.setOrigin(0.5, 0);
+            this.instructions.setDepth(1000);
         }
     }
 
@@ -493,6 +496,23 @@ class GameScene extends Phaser.Scene {
         const fruit = new Fruit(this, this.previewX, dropY, config, body);
 
         this.fruits.push(fruit);
+
+        // Track fruits dropped and hide instructions after first few
+        this.fruitsDropped++;
+        if (this.fruitsDropped >= 7 && this.instructions) {
+            // Fade out instructions
+            this.tweens.add({
+                targets: this.instructions,
+                alpha: 0,
+                duration: 500,
+                onComplete: () => {
+                    if (this.instructions) {
+                        this.instructions.destroy();
+                        this.instructions = null;
+                    }
+                }
+            });
+        }
 
         // Set cooldown - can't drop another fruit until this one collides
         this.canDrop = false;

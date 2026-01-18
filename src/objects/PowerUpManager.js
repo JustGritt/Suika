@@ -7,6 +7,10 @@ class PowerUpManager {
         this.powerUpButtons = [];
         this.unlockedPowerUps = new Set(); // Track which have been unlocked to avoid duplicate notifications
 
+        // Collapsible panel state
+        this.isPanelExpanded = false;
+        this.panelElements = []; // Store all UI elements for animation
+
         // Progression system - unlock charges as player progresses
         this.powerUpCharges = {
             'BOMB': 0,      // Will be awarded by first milestone
@@ -105,12 +109,6 @@ class PowerUpManager {
         const totalWidth = (buttonWidth * 4) + (spacing * 3);
         const startX = (GAME_WIDTH - totalWidth) / 2;
 
-        // Title (smaller for mobile)
-        this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 95, 'Power-Ups', {
-            fontSize: '14px',
-            color: '#333333',
-            fontStyle: 'bold'
-        }).setOrigin(0.5, 0).setDepth(1000);
 
         // Create buttons for each power-up type
         Object.keys(POWERUPS).forEach((key, index) => {
@@ -195,63 +193,76 @@ class PowerUpManager {
 
     createDesktopPowerUpUI() {
         const startX = 625; // Positioned to fit within 800px canvas (625 + 160 = 785, leaving 15px margin)
-        const startY = 100;
+        const startY = 190; // Start well below title and instruction
         const spacing = 80;
+        const collapsedX = 850; // Off-screen position when collapsed (far enough to hide shadows)
+
+        // Create toggle button
+        this.createToggleButton();
 
         // Title with shadow for better readability
-        const title = this.scene.add.text(startX, 50, 'Power-Ups', {
-            fontSize: '22px',
+        const title = this.scene.add.text(collapsedX + 10, 95, 'Power-Ups', {
+            fontSize: '18px',
             color: '#333333',
             fontStyle: 'bold',
             stroke: '#ffffff',
             strokeThickness: 3
         });
+        title.setDepth(1001);
+        this.panelElements.push(title);
 
         // Instruction
-        const instruction = this.scene.add.text(startX, 75, 'Click to queue next', {
+        const instruction = this.scene.add.text(collapsedX + 10, 120, 'Click to queue next', {
             fontSize: '11px',
             color: '#666666',
             stroke: '#ffffff',
             strokeThickness: 2
         });
+        instruction.setDepth(1001);
+        this.panelElements.push(instruction);
 
         // Create buttons for each power-up type
         Object.keys(POWERUPS).forEach((key, index) => {
             const powerUp = POWERUPS[key];
             const y = startY + index * spacing;
 
-            // Create button with depth using graphics
+            // Create button with depth using graphics (start off-screen)
             const btnGraphics = this.scene.add.graphics();
+            btnGraphics.x = collapsedX - startX; // Offset to move entire graphic
 
             // Shadow for depth
             btnGraphics.fillStyle(0x000000, 0.15);
-            btnGraphics.fillRoundedRect(startX + 2, y - 30 + 2, 160, 65, 8);
+            btnGraphics.fillRoundedRect(startX + 2, y - 32 + 2, 160, 65, 8);
 
             // Main button gradient
             btnGraphics.fillGradientStyle(0xe0e0e0, 0xe0e0e0, 0xd0d0d0, 0xd0d0d0, 1);
-            btnGraphics.fillRoundedRect(startX, y - 30, 160, 65, 8);
+            btnGraphics.fillRoundedRect(startX, y - 32, 160, 65, 8);
 
             // Top highlight for 3D effect
             btnGraphics.fillStyle(0xffffff, 0.3);
-            btnGraphics.fillRoundedRect(startX, y - 30, 160, 4, {tl: 8, tr: 8, bl: 0, br: 0});
+            btnGraphics.fillRoundedRect(startX, y - 32, 160, 4, {tl: 8, tr: 8, bl: 0, br: 0});
 
             // Border
             btnGraphics.lineStyle(2, 0x999999, 1);
-            btnGraphics.strokeRoundedRect(startX, y - 30, 160, 65, 8);
+            btnGraphics.strokeRoundedRect(startX, y - 32, 160, 65, 8);
+            btnGraphics.setDepth(1000);
+            this.panelElements.push(btnGraphics);
 
             // Create interactive hitbox
             const button = this.scene.add.rectangle(
-                startX + 80,
+                collapsedX + 80,
                 y,
                 160,
                 65,
                 0x000000,
                 0 // Transparent, just for interaction
             ).setInteractive();
+            button.setDepth(1001);
+            this.panelElements.push(button);
 
             // Power-up icon (emoji) with shadow
             const iconShadow = this.scene.add.text(
-                startX + 21,
+                collapsedX + 21,
                 y + 1,
                 powerUp.emoji || '⭐',
                 {
@@ -262,9 +273,11 @@ class PowerUpManager {
             );
             iconShadow.setOrigin(0.5, 0.5);
             iconShadow.setAlpha(0.2);
+            iconShadow.setDepth(1002);
+            this.panelElements.push(iconShadow);
 
             const icon = this.scene.add.text(
-                startX + 20,
+                collapsedX + 20,
                 y,
                 powerUp.emoji || '⭐',
                 {
@@ -273,10 +286,12 @@ class PowerUpManager {
                 }
             );
             icon.setOrigin(0.5, 0.5);
+            icon.setDepth(1003);
+            this.panelElements.push(icon);
 
             // Power-up name
             const text = this.scene.add.text(
-                startX + 50,
+                collapsedX + 50,
                 y - 17,
                 powerUp.name,
                 {
@@ -287,10 +302,12 @@ class PowerUpManager {
                     strokeThickness: 3 // Increased from 2
                 }
             );
+            text.setDepth(1003);
+            this.panelElements.push(text);
 
             // Description
             const desc = this.scene.add.text(
-                startX + 50,
+                collapsedX + 50,
                 y + 3,
                 powerUp.description,
                 {
@@ -302,10 +319,12 @@ class PowerUpManager {
                     wordWrap: { width: 100 }
                 }
             );
+            desc.setDepth(1003);
+            this.panelElements.push(desc);
 
             // Charge counter (positioned above to avoid overlap with longer names)
             const chargeText = this.scene.add.text(
-                startX + 150,
+                collapsedX + 150,
                 y - 28,
                 `x${this.powerUpCharges[key]}`,
                 {
@@ -317,6 +336,8 @@ class PowerUpManager {
                 }
             );
             chargeText.setOrigin(1, 0);
+            chargeText.setDepth(1003);
+            this.panelElements.push(chargeText);
 
             // Store references
             const buttonObj = {
@@ -353,19 +374,24 @@ class PowerUpManager {
                     // Hover glow effect
                     btnGraphics.clear();
                     btnGraphics.fillStyle(0x000000, 0.15);
-                    btnGraphics.fillRoundedRect(startX + 2, y - 30 + 2, 160, 65, 8);
+                    btnGraphics.fillRoundedRect(startX + 2, y - 32 + 2, 160, 65, 8);
                     btnGraphics.fillGradientStyle(0xf0f0f0, 0xf0f0f0, 0xe0e0e0, 0xe0e0e0, 1);
-                    btnGraphics.fillRoundedRect(startX, y - 30, 160, 65, 8);
+                    btnGraphics.fillRoundedRect(startX, y - 32, 160, 65, 8);
                     btnGraphics.fillStyle(0xffffff, 0.4);
-                    btnGraphics.fillRoundedRect(startX, y - 30, 160, 4, {tl: 8, tr: 8, bl: 0, br: 0});
+                    btnGraphics.fillRoundedRect(startX, y - 32, 160, 4, {tl: 8, tr: 8, bl: 0, br: 0});
                     btnGraphics.lineStyle(2, 0x888888, 1);
-                    btnGraphics.strokeRoundedRect(startX, y - 30, 160, 65, 8);
+                    btnGraphics.strokeRoundedRect(startX, y - 32, 160, 65, 8);
                 }
             });
 
             button.on('pointerout', () => {
                 this.updateButtonGraphics(buttonObj, startX, y);
             });
+        });
+
+        // Set initial alpha to 0 since panel starts collapsed
+        this.panelElements.forEach(element => {
+            element.setAlpha(0);
         });
 
         this.updateButtonStates();
@@ -380,7 +406,7 @@ class PowerUpManager {
 
         // Shadow
         btn.btnGraphics.fillStyle(0x000000, 0.15);
-        btn.btnGraphics.fillRoundedRect(x + 2, y - 30 + 2, 160, 65, 8);
+        btn.btnGraphics.fillRoundedRect(x + 2, y - 32 + 2, 160, 65, 8);
 
         // Button fill
         if (btn.locked) {
@@ -390,17 +416,17 @@ class PowerUpManager {
         } else {
             btn.btnGraphics.fillGradientStyle(0xe0e0e0, 0xe0e0e0, 0xd0d0d0, 0xd0d0d0, 1);
         }
-        btn.btnGraphics.fillRoundedRect(x, y - 30, 160, 65, 8);
+        btn.btnGraphics.fillRoundedRect(x, y - 32, 160, 65, 8);
 
         // Top highlight
         if (!btn.locked) {
             btn.btnGraphics.fillStyle(0xffffff, 0.3);
-            btn.btnGraphics.fillRoundedRect(x, y - 30, 160, 4, {tl: 8, tr: 8, bl: 0, br: 0});
+            btn.btnGraphics.fillRoundedRect(x, y - 32, 160, 4, {tl: 8, tr: 8, bl: 0, br: 0});
         }
 
         // Border
         btn.btnGraphics.lineStyle(2, btn.locked ? 0x666666 : (isQueued ? 0xff6600 : 0x999999), 1);
-        btn.btnGraphics.strokeRoundedRect(x, y - 30, 160, 65, 8);
+        btn.btnGraphics.strokeRoundedRect(x, y - 32, 160, 65, 8);
     }
 
     updateButtonStates() {
@@ -424,7 +450,7 @@ class PowerUpManager {
             // Update desktop button graphics
             if (btn.btnGraphics) {
                 const startX = 625; // Match createDesktopPowerUpUI
-                const startY = 100;
+                const startY = 190; // Match createDesktopPowerUpUI - start well below title and instruction
                 const spacing = 80;
                 const y = startY + index * spacing;
                 this.updateButtonGraphics(btn, startX, y);
@@ -810,12 +836,14 @@ class PowerUpManager {
 
     createDesktopProgressBar() {
         const x = 625; // Match power-up position
-        const y = 430;
+        const collapsedX = 850; // Off-screen position (match buttons)
+        const y = 490; // Positioned below power-ups, but within screen bounds
         const width = 160;
         const height = 80;
 
-        // Background container with depth
+        // Background container with depth (start off-screen)
         const bgGraphics = this.scene.add.graphics();
+        bgGraphics.x = collapsedX - x; // Offset to move entire graphic
 
         // Shadow
         bgGraphics.fillStyle(0x000000, 0.15);
@@ -833,10 +861,11 @@ class PowerUpManager {
         bgGraphics.lineStyle(2, 0x999999, 1);
         bgGraphics.strokeRoundedRect(x, y, width, height, 8);
         bgGraphics.setDepth(500);
+        this.panelElements.push(bgGraphics);
 
         // Title
         const title = this.scene.add.text(
-            x + width / 2,
+            collapsedX + width / 2,
             y + 12,
             'Next Unlock',
             {
@@ -849,6 +878,7 @@ class PowerUpManager {
         );
         title.setOrigin(0.5);
         title.setDepth(503);
+        this.panelElements.push(title);
 
         // Progress bar background
         const barWidth = width - 20;
@@ -857,17 +887,21 @@ class PowerUpManager {
         const barY = y + 50;
 
         const barBgGraphics = this.scene.add.graphics();
+        barBgGraphics.x = collapsedX - x; // Offset to move entire graphic
         barBgGraphics.fillStyle(0xcccccc, 1);
         barBgGraphics.fillRoundedRect(barX, barY, barWidth, barHeight, 7);
         barBgGraphics.setDepth(501);
+        this.panelElements.push(barBgGraphics);
 
         // Progress bar fill
         const barFillGraphics = this.scene.add.graphics();
+        barFillGraphics.x = collapsedX - x; // Offset to move entire graphic
         barFillGraphics.setDepth(502);
+        this.panelElements.push(barFillGraphics);
 
         // Next unlock description
         const nextUnlockText = this.scene.add.text(
-            x + width / 2,
+            collapsedX + width / 2,
             y + 30,
             'Loading...',
             {
@@ -880,10 +914,11 @@ class PowerUpManager {
         );
         nextUnlockText.setOrigin(0.5);
         nextUnlockText.setDepth(503);
+        this.panelElements.push(nextUnlockText);
 
         // Progress text
         const progressText = this.scene.add.text(
-            x + width / 2,
+            collapsedX + width / 2,
             y + 69,
             '0 / 0',
             {
@@ -895,6 +930,7 @@ class PowerUpManager {
         );
         progressText.setOrigin(0.5);
         progressText.setDepth(503);
+        this.panelElements.push(progressText);
 
         // Store references
         this.progressBar = {
@@ -987,6 +1023,114 @@ class PowerUpManager {
                 6
             );
         }
+    }
+
+    createToggleButton() {
+        const buttonX = GAME_WIDTH - 15;
+        const buttonY = 70;
+        const buttonWidth = 30;
+        const buttonHeight = 30;
+
+        // Create toggle button background
+        const toggleBg = this.scene.add.graphics();
+        toggleBg.fillStyle(0xffffff, 0.9);
+        toggleBg.fillRoundedRect(buttonX - buttonWidth, buttonY - buttonHeight / 2, buttonWidth, buttonHeight, 5);
+        toggleBg.lineStyle(2, 0xff9a9e, 1);
+        toggleBg.strokeRoundedRect(buttonX - buttonWidth, buttonY - buttonHeight / 2, buttonWidth, buttonHeight, 5);
+        toggleBg.setDepth(2000);
+
+        // Create toggle icon
+        this.toggleIcon = this.scene.add.text(
+            buttonX - buttonWidth / 2,
+            buttonY,
+            '⚡',
+            {
+                fontSize: '18px',
+                fontFamily: 'Arial, sans-serif',
+                color: '#333333'
+            }
+        );
+        this.toggleIcon.setOrigin(0.5);
+        this.toggleIcon.setDepth(2001);
+
+        // Create interactive area
+        const toggleButton = this.scene.add.rectangle(
+            buttonX - buttonWidth / 2,
+            buttonY,
+            buttonWidth,
+            buttonHeight,
+            0x000000,
+            0
+        ).setInteractive();
+        toggleButton.setDepth(2001);
+
+        // Store references
+        this.toggleButton = {
+            bg: toggleBg,
+            icon: this.toggleIcon,
+            button: toggleButton
+        };
+
+        // Click handler
+        toggleButton.on('pointerdown', () => {
+            this.togglePanel();
+        });
+
+        // Hover effect
+        toggleButton.on('pointerover', () => {
+            toggleBg.clear();
+            toggleBg.fillStyle(0xffdddd, 0.95);
+            toggleBg.fillRoundedRect(buttonX - buttonWidth, buttonY - buttonHeight / 2, buttonWidth, buttonHeight, 5);
+            toggleBg.lineStyle(2, 0xff9a9e, 1);
+            toggleBg.strokeRoundedRect(buttonX - buttonWidth, buttonY - buttonHeight / 2, buttonWidth, buttonHeight, 5);
+        });
+
+        toggleButton.on('pointerout', () => {
+            toggleBg.clear();
+            toggleBg.fillStyle(0xffffff, 0.9);
+            toggleBg.fillRoundedRect(buttonX - buttonWidth, buttonY - buttonHeight / 2, buttonWidth, buttonHeight, 5);
+            toggleBg.lineStyle(2, 0xff9a9e, 1);
+            toggleBg.strokeRoundedRect(buttonX - buttonWidth, buttonY - buttonHeight / 2, buttonWidth, buttonHeight, 5);
+        });
+    }
+
+    togglePanel() {
+        this.isPanelExpanded = !this.isPanelExpanded;
+
+        const slideDistance = 225; // 225px slide distance (850 - 625)
+
+        // Animate all panel elements
+        this.panelElements.forEach(element => {
+            this.scene.tweens.add({
+                targets: element,
+                x: element.x + (this.isPanelExpanded ? -slideDistance : slideDistance),
+                alpha: this.isPanelExpanded ? 1 : 0,
+                duration: 300,
+                ease: 'Power2'
+            });
+        });
+
+        // Update toggle icon and color
+        this.toggleIcon.setText(this.isPanelExpanded ? '✕' : '⚡');
+        this.toggleIcon.setColor('#333333'); // Dark color visible on both white and pink
+
+        // Update toggle button appearance
+        const buttonX = GAME_WIDTH - 15;
+        const buttonY = 70;
+        const buttonWidth = 30;
+        const buttonHeight = 30;
+
+        this.toggleButton.bg.clear();
+        if (this.isPanelExpanded) {
+            // Pink background when expanded
+            this.toggleButton.bg.fillStyle(0xffb6c1, 0.95);
+        } else {
+            // White background when collapsed
+            this.toggleButton.bg.fillStyle(0xffffff, 0.9);
+        }
+        this.toggleButton.bg.fillRoundedRect(buttonX - buttonWidth, buttonY - buttonHeight / 2, buttonWidth, buttonHeight, 5);
+        this.toggleButton.bg.lineStyle(2, 0xff9a9e, 1);
+        this.toggleButton.bg.strokeRoundedRect(buttonX - buttonWidth, buttonY - buttonHeight / 2, buttonWidth, buttonHeight, 5);
     }
 
     update() {

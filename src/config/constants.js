@@ -109,8 +109,18 @@ const FRUITS = [
         radius: 52,
         color: 0x228b22,
         points: 100,
-        next: null, // Final fruit
+        next: 'golden_cherry', // Merges into golden cherry!
         shape: 'circle' // Large circle
+    },
+    {
+        name: 'golden_cherry',
+        emoji: '🍒',
+        radius: 15,
+        color: 0xffd700, // Golden color
+        points: 500, // Huge bonus points!
+        next: null, // True final fruit
+        shape: 'cherry',
+        isGolden: true // Special flag for visual effects
     }
 ];
 
