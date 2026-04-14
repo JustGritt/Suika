@@ -9,7 +9,7 @@ const GAME_WIDTH = IS_MOBILE ? Math.min(window.innerWidth, 450) : 800;
 const GAME_HEIGHT = IS_MOBILE ? Math.min(window.innerHeight, 800) : 600;
 
 // Container dimensions (adjusted for mobile)
-const CONTAINER_WIDTH = IS_MOBILE ? Math.min(GAME_WIDTH - 40, 350) : 400;
+const CONTAINER_WIDTH = IS_MOBILE ? Math.min(GAME_WIDTH - 40, 250) : 300;
 const CONTAINER_HEIGHT = IS_MOBILE ? Math.min(GAME_HEIGHT * 0.55, 450) : 500;
 const CONTAINER_X = GAME_WIDTH / 2;
 const CONTAINER_Y = IS_MOBILE ? (GAME_HEIGHT * 0.35) : (GAME_HEIGHT / 2 + 20);
@@ -25,7 +25,7 @@ const FRUITS = [
     {
         name: 'cherry',
         emoji: '🍒',
-        radius: 12,
+        radius: 18,
         color: 0xff0000,
         points: 1,
         next: 'strawberry',
@@ -34,7 +34,7 @@ const FRUITS = [
     {
         name: 'strawberry',
         emoji: '🍓',
-        radius: 16,
+        radius: 24,
         color: 0xff69b4,
         points: 3,
         next: 'grape',
@@ -43,7 +43,7 @@ const FRUITS = [
     {
         name: 'grape',
         emoji: '🍇',
-        radius: 20,
+        radius: 30,
         color: 0x9370db,
         points: 6,
         next: 'orange',
@@ -52,7 +52,7 @@ const FRUITS = [
     {
         name: 'orange',
         emoji: '🍊',
-        radius: 24,
+        radius: 36,
         color: 0xffa500,
         points: 10,
         next: 'apple',
@@ -61,7 +61,7 @@ const FRUITS = [
     {
         name: 'apple',
         emoji: '🍎',
-        radius: 28,
+        radius: 42,
         color: 0xff4444,
         points: 15,
         next: 'pear',
@@ -70,7 +70,7 @@ const FRUITS = [
     {
         name: 'pear',
         emoji: '🍐',
-        radius: 32,
+        radius: 48,
         color: 0x90ee90,
         points: 21,
         next: 'peach',
@@ -79,7 +79,7 @@ const FRUITS = [
     {
         name: 'peach',
         emoji: '🍑',
-        radius: 36,
+        radius: 54,
         color: 0xffb6c1,
         points: 28,
         next: 'pineapple',
@@ -88,7 +88,7 @@ const FRUITS = [
     {
         name: 'pineapple',
         emoji: '🍍',
-        radius: 40,
+        radius: 60,
         color: 0xffd700,
         points: 36,
         next: 'melon',
@@ -97,7 +97,7 @@ const FRUITS = [
     {
         name: 'melon',
         emoji: '🍈',
-        radius: 44,
+        radius: 66,
         color: 0x7cfc00,
         points: 45,
         next: 'watermelon',
@@ -106,7 +106,7 @@ const FRUITS = [
     {
         name: 'watermelon',
         emoji: '🍉',
-        radius: 52,
+        radius: 78,
         color: 0x228b22,
         points: 100,
         next: 'golden_cherry', // Merges into golden cherry!
@@ -115,7 +115,7 @@ const FRUITS = [
     {
         name: 'golden_cherry',
         emoji: '🍒',
-        radius: 15,
+        radius: 22,
         color: 0xffd700, // Golden color
         points: 500, // Huge bonus points!
         next: null, // True final fruit
